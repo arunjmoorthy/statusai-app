@@ -37,14 +37,15 @@ import {
 } from 'lucide-react';
 import {
   mockStatusPage,
-  getActiveIncidents,
   addIncident,
   addIncidentUpdate,
+  updateComponentStatus,
 } from '@/lib/mock-data';
 import {
   Incident,
   IncidentStatus,
   IncidentSeverity,
+  ComponentStatus,
   statusColors,
   statusLabels,
   incidentStatusLabels,
@@ -396,7 +397,7 @@ export default function Dashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Components</CardTitle>
-                <CardDescription>Current status of your services</CardDescription>
+                <CardDescription>Click status to change</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -406,12 +407,52 @@ export default function Dashboard() {
                       className="flex items-center justify-between py-2 border-b last:border-0"
                     >
                       <span className="text-sm font-medium">{component.name}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">
-                          {statusLabels[component.status]}
-                        </span>
-                        <div className={`h-3 w-3 rounded-full ${statusColors[component.status]}`} />
-                      </div>
+                      <Select
+                        value={component.status}
+                        onValueChange={(value: ComponentStatus) => {
+                          updateComponentStatus(component.id, value);
+                          setStatusPage({ ...mockStatusPage });
+                        }}
+                      >
+                        <SelectTrigger className="w-[140px] h-8">
+                          <div className="flex items-center gap-2">
+                            <div className={`h-2 w-2 rounded-full ${statusColors[component.status]}`} />
+                            <span className="text-xs">{statusLabels[component.status]}</span>
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="operational">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 rounded-full bg-green-500" />
+                              Operational
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="degraded">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 rounded-full bg-yellow-500" />
+                              Degraded
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="partial_outage">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 rounded-full bg-orange-500" />
+                              Partial Outage
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="major_outage">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 rounded-full bg-red-500" />
+                              Major Outage
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="maintenance">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 rounded-full bg-blue-500" />
+                              Maintenance
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   ))}
                 </div>
