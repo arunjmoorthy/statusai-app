@@ -31,20 +31,37 @@ export function SubscribeDialog({ trigger }: SubscribeDialogProps) {
 
     setIsSubmitting(true);
 
-    // Simulate API call (will be replaced with real backend)
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim(),
+          statusPageId: 'demo-page', // Will be dynamic when multi-tenant
+        }),
+      });
 
-    setIsSubmitting(false);
-    setIsSubscribed(true);
+      const data = await response.json();
 
-    // Reset after 2 seconds
-    setTimeout(() => {
-      setIsOpen(false);
-      setTimeout(() => {
-        setIsSubscribed(false);
-        setEmail('');
-      }, 300);
-    }, 2000);
+      if (response.ok && data.success) {
+        setIsSubscribed(true);
+
+        // Reset after 2 seconds
+        setTimeout(() => {
+          setIsOpen(false);
+          setTimeout(() => {
+            setIsSubscribed(false);
+            setEmail('');
+          }, 300);
+        }, 2000);
+      } else {
+        console.error('Subscription failed:', data.error);
+      }
+    } catch (error) {
+      console.error('Subscription error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
