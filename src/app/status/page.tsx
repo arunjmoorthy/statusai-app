@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { OverallStatus, ComponentList, IncidentTimeline } from '@/components/status-page';
 import { mockStatusPage } from '@/lib/mock-data';
 import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { Bell, Sparkles, ArrowLeft } from 'lucide-react';
+import { SubscribeDialog } from '@/components/subscribe/SubscribeDialog';
+import { Sparkles, ArrowLeft } from 'lucide-react';
 
 export const metadata = {
   title: 'System Status - Acme Corp',
@@ -28,10 +28,7 @@ export default function StatusPage() {
                 <p className="text-sm text-muted-foreground">System Status</p>
               </div>
             </div>
-            <Button variant="outline" size="sm">
-              <Bell className="h-4 w-4 mr-2" />
-              Subscribe to Updates
-            </Button>
+            <SubscribeDialog />
           </div>
         </div>
       </header>
