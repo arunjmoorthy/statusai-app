@@ -106,18 +106,38 @@ export default function Dashboard() {
 
     setIsGeneratingAI(true);
 
-    // Simulate AI generation (will be replaced with real Claude API)
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      const componentNames = selectedIncident.affectedComponents.map(
+        compId => statusPage.components.find(c => c.id === compId)?.name || compId
+      );
 
-    const aiMessages: Record<IncidentStatus, string> = {
-      investigating: `We are actively investigating reports of ${selectedIncident.title.toLowerCase()}. Our engineering team is analyzing system logs and metrics to identify the root cause. We will provide updates as more information becomes available.`,
-      identified: `We have identified the root cause of ${selectedIncident.title.toLowerCase()}. Our team is implementing a fix and we expect the issue to be resolved shortly. Thank you for your patience.`,
-      monitoring: `A fix has been deployed for ${selectedIncident.title.toLowerCase()}. We are actively monitoring the system to ensure stability. So far, all metrics indicate the issue has been resolved.`,
-      resolved: `${selectedIncident.title} has been fully resolved. All affected services are now operating normally. We apologize for any inconvenience caused and have taken steps to prevent similar issues in the future.`,
-    };
+      const response = await fetch('/api/ai/generate-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          incidentTitle: selectedIncident.title,
+          status: updateStatus,
+          severity: selectedIncident.severity,
+          componentNames,
+          previousUpdates: selectedIncident.updates.slice(0, 3).map(u => ({
+            status: u.status,
+            message: u.message,
+          })),
+        }),
+      });
 
-    setUpdateMessage(aiMessages[updateStatus]);
-    setIsGeneratingAI(false);
+      const data = await response.json();
+
+      if (data.message) {
+        setUpdateMessage(data.message);
+      }
+    } catch (error) {
+      console.error('Failed to generate AI update:', error);
+      // Fallback to simple message
+      setUpdateMessage(`We are currently ${updateStatus} the issue: ${selectedIncident.title}. Updates will follow.`);
+    } finally {
+      setIsGeneratingAI(false);
+    }
   };
 
   return (
